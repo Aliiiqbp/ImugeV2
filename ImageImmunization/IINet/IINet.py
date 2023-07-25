@@ -308,3 +308,41 @@ class Inveritible_Decolorization(nn.Module):
         return out
 
 
+# Example Usage:
+"""
+    img_name = "1.jpg"
+
+    image_c = cv2.imread(img_name, cv2.IMREAD_COLOR)[:, :, ::-1] / 255
+    image_c = cv2.resize(image_c, dsize=(256, 256), interpolation=cv2.INTER_LINEAR)
+    tensor_c = torch.from_numpy(image_c.transpose((2, 0, 1)).astype(np.float32))  # default: 2, 0, 1
+
+    batch_c = tensor_c.unsqueeze(0)
+
+    net = Inveritible_Decolorization()
+    net.load_state_dict(torch.load("ColorFlow_IDN.pth"))
+    # net.eval()
+    decolor_img = net.forward(tensor_c.unsqueeze(0))
+    net = net.cuda()
+
+    with torch.no_grad():
+        batch_x = net(x=[batch_c.cuda()], rev=False)
+        batch_y = net(x=batch_x, rev=True)[0]
+
+    print((batch_y.cpu() - batch_c).sum())
+
+    plt.figure(0)
+    plt.imshow(image_c)
+    plt.show()
+
+    plt.figure(1)
+    plt.imshow(decolor_img)
+    plt.show()
+
+    r = batch_y.cpu().numpy()[0, :, :, :]
+    plt.figure(2)
+    plt.imshow(r.transpose((1, 2, 0)))
+    plt.show()
+
+    print("done")
+
+"""
